@@ -1,11 +1,15 @@
 ---
-title: "Welcome To My Blog Template"
-author: "Emi Tanaka"
-date: "2022-07-18"
-categories: [news]
+title: "Welcome To My Star Wars Survey Blog"
+author: "Chatpisut Makornkhan"
+date: "2022-09-06"
+categories: [welcome]
 ---
 
-This is the first post in a Quarto blog. Welcome!
+Welcome fellow force users! 
+
+
+This blog is dedicated to all fans and non-fans of Star Wars who seek exploration of various thoughts toward the franchise. 
+Without further ado, let us explore the galaxy far, far away... in the "Data Summary" post above this welcome page in the homepage.
 
 ![](thumbnail.jpg)
 

@@ -6,8 +6,14 @@ about:
   links:
     - icon: github
       text: Github
-      href: https://github.com/etc5523-2022
+      href: https://github.com/etc5523-2022/blog-chatpisutmck
+    - icon: linkedin
+      text: LinkedIn
+      href: https://www.linkedin.com/in/chatpisut-magic-makornkhan-2bb667167/
 
 ---
 
-This is a blog template for the ETC5523 Communicating with Data assessment at Monash University.
+This is a blog assessment for the ETC5523 Communicating with Data assessment at Monash University.
+The main purpose of this blog and dataset used is merely for educational purpose only.
+
+

@@ -1,11 +1,11 @@
 ---
-title: "ETC5523 Blog Assessment"
+title: "ETC5523 Blog Assessment - Star Wars Survey"
 listing:
   contents: posts
   sort: "date desc"
   type: default
   categories: true
-  sort-ui: false
+  sort-ui: true
   filter-ui: false
 page-layout: full
 title-block-banner: true

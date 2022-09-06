@@ -2,15 +2,18 @@ project:
   type: website
 
 website:
-  title: "blog-template"
+  title: "Home"
   navbar:
-    right:
+    left:
       - about.qmd
+      - data.qmd
       - icon: github
-        href: https://github.com/etc5523-2022
+        href: https://github.com/etc5523-2022/blog-chatpisutmck
+      - icon: linkedin
+        href: https://www.linkedin.com/in/chatpisut-magic-makornkhan-2bb667167/
 format:
   html:
-    theme: cosmo
+    theme: cyborg
     css: styles.css
 
 

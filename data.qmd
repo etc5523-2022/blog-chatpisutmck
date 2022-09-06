@@ -1,0 +1,18 @@
+---
+title: "Data Source"
+image: github.jpg
+about:
+  template: jolla
+  links:
+    - icon: github
+      text: Data Source (Github)
+      href: https://github.com/rfordatascience/tidytuesday/tree/master/data/2018/2018-05-14
+
+---
+
+This dataset used and visualized in this blog is from the survey with the main topic of Star Wars,
+in which question range from favorite film ranking to watched films and their demographic data.
+
+Please find the link to the data source below
+
+

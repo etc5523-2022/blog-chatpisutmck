@@ -1,0 +1,278 @@
+---
+title: "Star Wars Survey - Demographic Summary based on Fans and Non-Fans"
+author: "Chatpisut Makornkhan"
+date: "2022-09-06"
+categories: [Data Story]
+image: "image1.jpg"
+---
+
+The data awakens, from galaxy far, far away...
+
+
+Since its debut in 1977, Star Wars has become a global phenomenon with millions of fan base and cult followers.
+Its success has hit the mainstream and has been one of the most important factor in the modern pop-culture.
+As a result, there are more than plenty of research and survey conducted from time to time to explore the result of modern population and their thoughts toward this franchise.
+
+Now, let us proceed through the exploration of data and analysis in this survey...
+
+```{r, message = FALSE, echo=FALSE}
+library(data.table)
+library(ggplot2)
+library(lubridate)
+library(tidyverse)
+library(bookdown)
+library(kableExtra)
+
+sw_data <- read_csv("data/week7_starwars.csv", locale=locale(encoding="latin1"))
+```
+
+
+```{r data_wrangling_1, message = FALSE, echo=FALSE}
+
+sw_data_v2 <- sw_data %>%
+  select(!c("Which character shot first?", "Are you familiar with the Expanded Universe?", "Do you consider yourself to be a fan of the Expanded Universe?\u008cæ", "Do you consider yourself to be a fan of the Star Trek franchise?"))
+
+sw_data_v2 <- sw_data_v2[-1,]
+sw_data_v3 <- sw_data_v2 %>%
+  filter(sw_data_v2$`Have you seen any of the 6 films in the Star Wars franchise?` == "Yes")
+
+sw_data_nonqualify <- sw_data_v2 %>%
+  filter(sw_data_v2$`Have you seen any of the 6 films in the Star Wars franchise?` == "No")
+
+sw_data_fans <- sw_data_v3 %>%
+  filter(sw_data_v3$`Do you consider yourself to be a fan of the Star Wars film franchise?` == "Yes")
+
+sw_data_nonfans <- sw_data_v3 %>%
+  filter(sw_data_v3$`Do you consider yourself to be a fan of the Star Wars film franchise?` == "No")
+
+Remark <- c("Total Observation", "Unqualified Obs Terminated", "Unqualified Obs Nonwatch", "StarWars Fans", "StarWars NonFans")
+Number <- c(1186, 100, 250, 552, 284)
+
+sw_overview <- data.frame(Remark, Number)
+
+```
+
+
+```{r, echo=FALSE}
+sw_data_fans_demo <- sw_data_fans %>%
+  select(c("RespondentID", "Gender", "Age", "Household Income", "Education", "Location (Census Region)" )) %>% 
+   rename("Location" = "Location (Census Region)",
+         "HHI" = "Household Income") %>% 
+   na.omit()
+
+sw_data_nonfans_demo <- sw_data_nonfans %>%
+  select(c("RespondentID", "Gender", "Age", "Household Income", "Education", "Location (Census Region)" )) %>% 
+   rename("Location" = "Location (Census Region)",
+         "HHI" = "Household Income") %>% 
+   na.omit()
+```
+
+
+
+```{r data_wrangling_2, message = FALSE, echo=FALSE}
+
+sw_data_fans_rank_pre <- sw_data_fans %>%
+  select(c("Please rank the Star Wars films in order of preference with 1 being your favorite film in the franchise and 6 being your least favorite film.",
+           "...11", "...12", "...13", "...14", "...15")) %>%
+  rename("Rank Episode I" = "Please rank the Star Wars films in order of preference with 1 being your favorite film in the franchise and 6 being your least favorite film.",
+         "Rank Episode II" = "...11",
+         "Rank Episode III" = "...12",
+         "Rank Episode IV" = "...13",
+         "Rank Episode V" = "...14",
+         "Rank Episode VI" = "...15")
+
+sw_data_fans_rank <- sw_data_fans_rank_pre[-1,] %>%
+  na.omit()
+
+sw_data_nonfans_rank_pre <- sw_data_nonfans %>%
+  select(c("Please rank the Star Wars films in order of preference with 1 being your favorite film in the franchise and 6 being your least favorite film.",
+           "...11", "...12", "...13", "...14", "...15")) %>%
+  rename("Rank Episode I" = "Please rank the Star Wars films in order of preference with 1 being your favorite film in the franchise and 6 being your least favorite film.",
+         "Rank Episode II" = "...11",
+         "Rank Episode III" = "...12",
+         "Rank Episode IV" = "...13",
+         "Rank Episode V" = "...14",
+         "Rank Episode VI" = "...15")
+
+sw_data_nonfans_rank <- sw_data_nonfans_rank_pre[-1,] %>%
+  na.omit()
+
+sw_data_dom_pre <- sw_data_v2 %>%
+  select(c("RespondentID", "Gender", "Age", "Household Income", "Education", "Location (Census Region)" )) %>% 
+   rename("Location" = "Location (Census Region)",
+         "HHI" = "Household Income")
+
+sw_data_dom <- sw_data_dom_pre[-1,] %>%
+  na.omit
+
+
+sw_data_fans_rank_sum <- as.data.frame(unclass(sw_data_fans_rank), stringsAsFactors = TRUE) %>%
+  rename("Rank_Episode_I" = "Rank.Episode.I",
+         "Rank_Episode_II" = "Rank.Episode.II",
+         "Rank_Episode_III" = "Rank.Episode.III",
+         "Rank_Episode_IV" = "Rank.Episode.IV",
+         "Rank_Episode_V" = "Rank.Episode.V",
+         "Rank_Episode_VI" = "Rank.Episode.VI",)
+```
+
+
+```{r data_wrangling_3, message = FALSE, echo=FALSE}
+
+sw_fans_final_rank <- sw_data_fans_rank_sum %>%
+  group_by(Rank_Episode_I, Rank_Episode_II, Rank_Episode_III, Rank_Episode_IV, Rank_Episode_V, Rank_Episode_VI) %>%
+  summarise(n=n()) %>%
+  ungroup() %>%
+  arrange(desc(n)) %>%
+  head(10)
+
+
+Film_Rank <- c("EP4-EP5-EP6-EP1-EP2-EP3", "EP5-EP6-EP1-EP2-EP3-EP4", "EP1-EP2-EP3-EP4-EP5-EP6", "EP4-EP6-EP5-EP1-EP2-EP3", "EP5-EP4-EP6-EP3-EP2-EP1", "EP5-EP4-EP6-EP1-EP2-EP3")
+People_Choosen <- c(47, 27, 19, 19, 16, 15)
+
+sw_fans_rank_df <- data.frame(Film_Rank, People_Choosen)
+```
+
+
+```{r data_wrangling_4, message = FALSE, echo=FALSE}
+Film_Rank <- c("EP1-EP2-EP3-EP4-EP5-EP6", "EP5-EP6-EP1-EP2-EP3-EP4", "EP5-EP1-EP2-EP3-EP4-EP6", "EP4-EP5-EP6-EP1-EP2-EP3", "EP5-EP6-EP4-EP1-EP2-EP3", "EP6-EP5-EP1-EP2-EP3-EP4")
+People_Choosen <- c(51, 37, 18, 17, 10, 9)
+
+sw_nonfans_rank_df <- data.frame(Film_Rank, People_Choosen)
+```
+
+
+```{r data_wrangling_5, message = FALSE, echo=FALSE}
+sw_data_nonfans_rank_sum <- as.data.frame(unclass(sw_data_nonfans_rank), stringsAsFactors = TRUE) %>%
+  rename("Rank_Episode_I" = "Rank.Episode.I",
+         "Rank_Episode_II" = "Rank.Episode.II",
+         "Rank_Episode_III" = "Rank.Episode.III",
+         "Rank_Episode_IV" = "Rank.Episode.IV",
+         "Rank_Episode_V" = "Rank.Episode.V",
+         "Rank_Episode_VI" = "Rank.Episode.VI",)
+
+
+sw_nonfans_final_rank  <- sw_data_nonfans_rank_sum %>%
+  group_by(Rank_Episode_I, Rank_Episode_II, Rank_Episode_III, Rank_Episode_IV, Rank_Episode_V, Rank_Episode_VI) %>%
+  summarise(n=n()) %>%
+  arrange(desc(n))
+```
+
+## Analysis
+
+First, let us have a quick look at demographic detail as below...
+
+```{r Q1, eval=TRUE, echo=FALSE}
+#| label: tbl-demo
+#| tbl-cap: Demography overview based on age and gender
+
+demo_tab <- sw_data_dom %>% 
+  group_by(Age) %>% 
+  count(Age, Gender, sort = FALSE)%>% 
+  kable() %>% 
+  kable_styling()
+
+demo_tab
+```
+
+In Table @tbl-demo, we can see that distribution of respondents are pleasantly surprising, in which they are well-equally distributed across most age and gender range. However, two noticeable points are distribution of Age above 60 and 18-29, which female respondent dominated that of male by some margin; as well as total number of respondent are different in between them as well.
+
+
+```{r Q2, eval=TRUE, echo=FALSE}
+#| label: tbl-demo-fans
+#| tbl-cap: Demographical overview of Star Wars Fans based on age and gender
+
+demo_tab_fans <- sw_data_fans_demo %>% 
+  group_by(Age) %>% 
+  count(Age, Gender, sort = TRUE)%>% 
+  kable() %>% 
+  kable_styling()
+
+demo_tab_fans
+```
+
+
+```{r Q3, eval=TRUE, echo=FALSE}
+#| label: tbl-demo-nonfans
+#| tbl-cap: Demography overview of Star Wars Non-Fans based on age and gender
+
+demo_tab_nonfans <- sw_data_nonfans_demo %>% 
+  group_by(Age) %>% 
+  count(Age, Gender, sort = TRUE)%>% 
+  kable() %>% 
+  kable_styling()
+
+demo_tab_nonfans
+```
+
+Furthermore, if we classify these demographical data by fans and non-fans criteria, both in Table @tbl-demo-fans and Table @tbl-demo-nonfans with direct comparison, it appears that majority of people who considered themselves as Star Wars fans are older age male, with combined substaintially more than half of the respondent pool in fans category. On the contrary, those who considered themselves non-fans of this Sci-Fi franchise are majorly older age female. Still, it seems that almost have of the total respondents considered themselves as Star Wars fans significantly more than non-fans (n = 434 for Fans and n = 238 for Non-Fans, respectively)
+
+
+```{r pre_Q4, echo=FALSE}
+
+ranking_df <- sw_fans_rank_df %>% 
+  left_join(sw_nonfans_rank_df, by = c("Film_Rank")) %>% 
+  rename("Fans Chosen" = "People_Choosen.x",
+         "Non-Fans Chosen" = "People_Choosen.y",
+         "Film Ranking" = "Film_Rank") %>% 
+  head(3)
+```
+
+```{r Q4, echo=FALSE}
+
+Film_Rank <- c("EP4-EP5-EP6-EP1-EP2-EP3", "EP5-EP6-EP1-EP2-EP3-EP4", "EP1-EP2-EP3-EP4-EP5-EP6", "EP4-EP5-EP6-EP1-EP2-EP3", "EP5-EP6-EP1-EP2-EP3-EP4", "EP1-EP2-EP3-EP4-EP5-EP6")
+Fanology <- c("Fans Chosen", "Fans Chosen", "Fans Chosen", "Non-Fans Chosen", "Non-Fans Chosen", "Non-Fans Chosen")
+Number <- c(47,27,19,17,37,51)
+
+sw_ranking <- data.frame(Film_Rank, Fanology, Number) %>% 
+  rename("Film Ranking" = "Film_Rank")
+
+```
+
+```{r Q5, echo=FALSE}
+#| label: tbl-rank
+#| tbl-cap: Ranking of Favorite Films Based on Fans and Non-Fans (Film Ranking are ordered from left being most favorite to right being less favorite)
+
+sw_ranking %>%  kable() %>% 
+  kable_styling()
+
+```
+
+
+Lastly, as we take a glance on the two opposite thoughts of favorite films, based on fans and non-fans from Table @tbl-rank, we can certainly see the real pattern of what truly distinguish between fans and non-fans of the series. As **EP4-EP5-EP6-EP1-EP2-EP3** seems to be the most popular choice for majority of fans, majority of non-fans has chosen **EP1-EP2-EP3-EP4-EP5-EP6** instead. To add on this, being a Star Wars fans myself, this ranking by majority of non-fans seem unthoughtful; since this is perhaps the most basic and spontaneous answer anyone can come up with by ranking films by chronological order. Thus, fans respondents seems to be legit and the same goes with non-fans.
+
+
+## Reference
+
+Dowle M, Srinivasan A (2021). _data.table: Extension of `data.frame`_. R package version 1.14.2,
+  <https://CRAN.R-project.org/package=data.table>.
+  
+Garrett Grolemund, Hadley Wickham (2011). Dates and Times Made Easy with lubridate. Journal of Statistical Software, 40(3), 1-25. URL
+  https://www.jstatsoft.org/v40/i03/.
+  
+H. Wickham. ggplot2: Elegant Graphics for Data Analysis. Springer-Verlag New York, 2016.
+
+Wickham H, Averick M, Bryan J, Chang W, McGowan LD, François R, Grolemund G, Hayes A, Henry L, Hester J, Kuhn M, Pedersen TL, Miller E,
+  Bache SM, Müller K, Ooms J, Robinson D, Seidel DP, Spinu V, Takahashi K, Vaughan D, Wilke C, Woo K, Yutani H (2019). “Welcome to the
+  tidyverse.” _Journal of Open Source Software_, *4*(43), 1686. doi:10.21105/joss.01686 <https://doi.org/10.21105/joss.01686>.
+  
+Yihui Xie (2022). bookdown: Authoring Books and Technical Documents with R Markdown. R package version 0.28.
+
+Zhu H (2021). _kableExtra: Construct Complex Table with 'kable' and Pipe Syntax_. R package version 1.3.4,
+  <https://CRAN.R-project.org/package=kableExtra>.
+
+## Datasets
+
+1. [Star Wars Survey](https://github.com/rfordatascience/tidytuesday/tree/master/data/2018/2018-05-14>)
+
+## Data Description
+
+List below are name of column (variables) and its remark with explanation of each column name meaning
+(Some of which are self-explanatory and can be interpreted without explanation will be omitted from including in this list)
+
+* RespondentID - Unique number of respondent which corresponded to this survey
+* Gender - Either categorized into "Male" or "Female"
+* Age - including four ranges: 18-29, 30-44, 45-60 and >60 years old. 
+* HHI - Stands for "Household Income", including five ranges: "$0 - $24,999", "$25,000 - $49,999", "$50,000 - $99,999", "$100,000 - $149,999", "$150,000+"
+* Education - Respondents' latest education degree
+* Location - Classified by region in USA
+* n - number of respondent
